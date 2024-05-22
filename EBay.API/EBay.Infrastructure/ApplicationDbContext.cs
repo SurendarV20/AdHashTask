@@ -23,6 +23,8 @@ namespace EBay.Infrastructure
         {
             base.OnModelCreating(builder);
 
+            builder.Entity<VehicleDetail>().HasKey(s => s.VehicleDetailId);
+
         }
 
         public DbSet<VehicleDetail> VehicleDetails { get; set; }

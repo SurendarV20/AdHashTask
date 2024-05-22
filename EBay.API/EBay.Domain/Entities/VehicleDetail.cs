@@ -11,6 +11,6 @@ namespace EBay.Domain.Entities
         public int Status { get; set; }
         public string Trim { get; set; }
         public string Engine { get; set; }
-        public string Notes { get; set; }
+        public string? Notes { get; set; }
     }
 }

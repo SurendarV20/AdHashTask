@@ -88,19 +88,29 @@ namespace EBay.Service
         }
 
 
-        public IEnumerable<VehicleDetailDto> GetvehicleDetail()
+        public IEnumerable<VehicleDetailDto> GetAllVehicleDetail()
         {
 
-            var vehicleDetailList = _vehicleRepo.GetAll();
+            var res = _vehicleRepo.GetAll();
 
-            if (vehicleDetailList is null)
+            return GetVehicleDetailListDto(res);
+
+        }
+
+        public async Task<IEnumerable<VehicleDetailDto>> GetSearchResults(string query)
+        {
+            var res = await _dbContext.VehicleDetails.Where(s => s.Notes.Contains(query) || s.Make.Contains(query) || s.Year.ToString().Contains(query) || s.Model.Contains(query) || s.Trim.Contains(query)).ToListAsync();
+            return GetVehicleDetailListDto(res);
+        }
+
+        private IEnumerable<VehicleDetailDto> GetVehicleDetailListDto(IEnumerable<VehicleDetail> vehicleDetails)
+        {
+            if (vehicleDetails is null)
             {
-                throw new ApplicationException("Year is empty");
+                return Enumerable.Empty<VehicleDetailDto>();
             }
-
             var vehicleDetailListDto = new List<VehicleDetailDto>();
-
-            foreach (var item in vehicleDetailList)
+            foreach (var item in vehicleDetails)
             {
                 vehicleDetailListDto.Add(new VehicleDetailDto()
                 {
@@ -115,6 +125,12 @@ namespace EBay.Service
             }
 
             return vehicleDetailListDto;
+        }
+
+        public async Task<IEnumerable<VehicleDetailDto>> GetVehicleDetailList(VehicleDataListRequestDto vehicleDataListRequestDto)
+        {
+            var res = await _dbContext.VehicleDetails.Where(s => s.Make == vehicleDataListRequestDto.Make && s.Model == vehicleDataListRequestDto.Model && s.Year == vehicleDataListRequestDto.Year).ToListAsync();
+            return GetVehicleDetailListDto(res);
         }
     }
 }

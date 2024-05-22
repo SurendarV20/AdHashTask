@@ -1,11 +1,10 @@
-﻿namespace EBay.API.Configuration
+﻿using Newtonsoft.Json;
+using System.Net;
+
+namespace EBay.API.Configuration
+
 {
-    using Microsoft.AspNetCore.Http;
-    using Microsoft.Extensions.Logging;
-    using Newtonsoft.Json;
-    using System;
-    using System.Net;
-    using System.Threading.Tasks;
+
 
     public class ExceptionHandlingMiddleware
     {
@@ -24,7 +23,6 @@
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Something went wrong: {ex}");
                 await HandleExceptionAsync(httpContext, ex);
             }
         }

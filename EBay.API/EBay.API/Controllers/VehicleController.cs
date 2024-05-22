@@ -39,7 +39,7 @@ namespace EBay.API.Controllers
         [HttpPost("import")]
         public async Task<IActionResult> ImportVehicles([FromForm] IFormFile file)
         {
-            if (file == null || file.Length == 0 || file.)
+            if (file == null || file.Length == 0)
             {
                 return BadRequest("No file uploaded.");
             }
@@ -54,19 +54,17 @@ namespace EBay.API.Controllers
 
         }
 
-        [HttpPost("search/{query}")]
+        [HttpGet("search/{query}")]
         public async Task<IActionResult> GetSearchResult([FromRoute] string query)
         {
-            return Ok();
-
+            return Ok(await _vehicleService.GetSearchResults(query));
         }
 
 
-        [HttpPost("View")]
-        public async Task<IActionResult> View()
+        [HttpGet("View")]
+        public IActionResult View()
         {
-            return Ok();
-
+            return Ok(_vehicleService.GetAllVehicleDetail());
         }
 
 
@@ -74,8 +72,7 @@ namespace EBay.API.Controllers
         [HttpPost("vehicleDataList")]
         public async Task<IActionResult> GetVehicleDataList([FromBody] VehicleDataListRequestDto vehicleDataListRequestDto)
         {
-            return Ok();
-
+            return Ok(_vehicleService.GetVehicleDetailList(vehicleDataListRequestDto));
         }
     }
 }
