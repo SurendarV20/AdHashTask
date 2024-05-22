@@ -37,19 +37,19 @@ namespace EBay.API.Controllers
         }
 
         [HttpPost("import")]
-        public async Task<IActionResult> ImportVehicles([FromForm] IFormFile file)
+        public async Task<IActionResult> ImportVehicles([FromForm] FileDto fileDto)
         {
-            if (file == null || file.Length == 0)
+            if (fileDto.File == null || fileDto.File.Length == 0)
             {
                 return BadRequest("No file uploaded.");
             }
 
-            var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
-            if (string.IsNullOrEmpty(extension) || extension != ".xl")
+            var extension = Path.GetExtension(fileDto.File.FileName).ToLowerInvariant();
+            if (string.IsNullOrEmpty(extension) || extension != ".xlsx")
             {
                 return BadRequest("Invalid file extension.");
             }
-            await _vehicleService.ImportVehicles(file);
+            await _vehicleService.ImportVehicles(fileDto.File);
             return Ok();
 
         }

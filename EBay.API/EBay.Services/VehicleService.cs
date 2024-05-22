@@ -1,4 +1,5 @@
-﻿using EBay.API.Infrastructure;
+﻿using EBay.API.Domain.Interfaces;
+using EBay.API.Infrastructure;
 using EBay.Domain;
 using EBay.Domain.Entities;
 using EBay.Domain.Interfaces;
@@ -14,12 +15,14 @@ namespace EBay.Service
     {
         private readonly ApplicationDbContext _dbContext;
         public readonly IRepository<VehicleDetail> _vehicleRepo;
+        private readonly IUnitOfWork _unitOfWork;
 
         public VehicleService(IApplicationDbContextFactory applicationDbContextFactory,
-        IRepository<VehicleDetail> vehicleRepo)
+        IRepository<VehicleDetail> vehicleRepo, IUnitOfWork unitOfWork)
         {
             _dbContext = applicationDbContextFactory.Get();
             _vehicleRepo = vehicleRepo;
+            _unitOfWork = unitOfWork;
         }
 
         public async Task ImportVehicles(IFormFile file)
@@ -48,14 +51,18 @@ namespace EBay.Service
                         vehicleList.Add(vehicle);
                     }
                 }
-                await _dbContext.AddRangeAsync(vehicleList);
+                await _vehicleRepo.InsertBulkAsync(vehicleList);
+                await _unitOfWork.CommitAsync();
             }
         }
 
 
         public async Task<IEnumerable<string>> GetMakes()
         {
-            var makes = await _vehicleRepo.GetAllQueryable().DistinctBy(s => s.Make).Select(s => s.Make).ToListAsync();
+            var makes = await _vehicleRepo.GetAllQueryable()
+                                           .GroupBy(s => s.Make)
+                                           .Select(g => g.Key)
+                                           .ToListAsync();
             if (makes is null)
             {
                 throw new ApplicationException("Make is empty");
@@ -67,24 +74,33 @@ namespace EBay.Service
 
         public async Task<IEnumerable<string>> GetModels(string make)
         {
-            var model = await _vehicleRepo.GetAllQueryable().Where(s => s.Make == make).DistinctBy(s => s.Model).Select(s => s.Model).ToListAsync();
-            if (model is null)
+            var models = await _vehicleRepo.GetAllQueryable()
+                        .Where(s => s.Make == make)
+                        .GroupBy(s => new { s.Make, s.Model })
+                        .Select(g => g.Key.Model)
+                        .ToListAsync();
+
+            if (models is null)
             {
                 throw new ApplicationException("Model is empty");
             }
 
-            return model;
+            return models;
         }
 
         public async Task<IEnumerable<int>> GetYears(string make, string model)
         {
-            var year = await _vehicleRepo.GetAllQueryable().Where(s => s.Make == make && s.Model == model).DistinctBy(s => s.Year).Select(s => s.Year).ToListAsync();
-            if (year is null)
+            var years = await _vehicleRepo.GetAllQueryable()
+                        .Where(s => s.Make == make && s.Model == model)
+                        .GroupBy(s => new { s.Make, s.Model, s.Year })
+                        .Select(g => g.Key.Year)
+                        .ToListAsync();
+            if (years is null)
             {
                 throw new ApplicationException("Year is empty");
             }
 
-            return year;
+            return years;
         }
 
 
