@@ -1,5 +1,6 @@
 ﻿using EBay.Domain.Entities;
 using EBay.Domain.Entities.Identity;
+using EBay.Dto;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -24,7 +25,6 @@ namespace EBay.Infrastructure
             base.OnModelCreating(builder);
 
             builder.Entity<VehicleDetail>().HasKey(s => s.VehicleDetailId);
-
         }
 
         public DbSet<VehicleDetail> VehicleDetails { get; set; }

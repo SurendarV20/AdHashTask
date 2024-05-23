@@ -23,16 +23,16 @@ namespace EBay.API.Controllers
         }
 
         [HttpGet("model")]
-        public async Task<IActionResult> GetModels(string make)
+        public async Task<IActionResult> GetModels()
         {
-            return Ok(await _vehicleService.GetModels(make));
+            return Ok(await _vehicleService.GetModels());
 
         }
 
         [HttpGet("year")]
-        public async Task<IActionResult> GetYears(string make, string model)
+        public async Task<IActionResult> GetYears()
         {
-            return Ok(await _vehicleService.GetYears(make, model));
+            return Ok(await _vehicleService.GetYears());
 
         }
 
@@ -70,9 +70,9 @@ namespace EBay.API.Controllers
 
 
         [HttpPost("vehicleDataList")]
-        public async Task<IActionResult> GetVehicleDataList([FromBody] VehicleDataListRequestDto vehicleDataListRequestDto)
+        public async Task<IActionResult> GetVehicleDataList([FromBody] List<VehicleDataListRequestDto> vehicleDataListRequestDtoList)
         {
-            return Ok(_vehicleService.GetVehicleDetailList(vehicleDataListRequestDto));
+            return Ok(_vehicleService.GetVehicleDetailList(vehicleDataListRequestDtoList));
         }
     }
 }

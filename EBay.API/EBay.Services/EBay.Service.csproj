@@ -13,6 +13,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\EBay.Dto\EBay.Dto.csproj" />
+    <ProjectReference Include="..\EBay.Helpers\EBay.Helpers.csproj" />
     <ProjectReference Include="..\EBay.Infrastructure\EBay.Infrastructure.csproj" />
   </ItemGroup>
 

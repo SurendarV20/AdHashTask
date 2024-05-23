@@ -18,7 +18,14 @@ namespace EBay.API
             builder.Services.AddHttpContextAccessor();
             builder.Services.AddInfrastructureServices(builder.Configuration.GetConnectionString("DefaultConnection"));
             builder.Services.AddServices();
-
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("CorsPolicy",
+                    builder => builder.AllowAnyOrigin()
+                    .AllowAnyMethod()
+                    .AllowAnyHeader()
+                    .AllowAnyOrigin());
+            });
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -30,6 +37,8 @@ namespace EBay.API
             app.UseMiddleware<ExceptionHandlingMiddleware>();
 
             app.UseHttpsRedirection();
+            app.UseCors("CorsPolicy");
+
 
             app.UseAuthorization();
 

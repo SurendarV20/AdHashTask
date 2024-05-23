@@ -4,10 +4,13 @@ using EBay.Domain;
 using EBay.Domain.Entities;
 using EBay.Domain.Interfaces;
 using EBay.Dto;
+using EBay.Helpers;
 using EBay.Infrastructure;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using OfficeOpenXml;
+using System.Data;
 
 namespace EBay.Service
 {
@@ -72,12 +75,11 @@ namespace EBay.Service
         }
 
 
-        public async Task<IEnumerable<string>> GetModels(string make)
+        public async Task<IEnumerable<string>> GetModels()
         {
             var models = await _vehicleRepo.GetAllQueryable()
-                        .Where(s => s.Make == make)
-                        .GroupBy(s => new { s.Make, s.Model })
-                        .Select(g => g.Key.Model)
+                        .GroupBy(s => s.Model)
+                        .Select(g => g.Key)
                         .ToListAsync();
 
             if (models is null)
@@ -88,18 +90,16 @@ namespace EBay.Service
             return models;
         }
 
-        public async Task<IEnumerable<int>> GetYears(string make, string model)
+        public async Task<IEnumerable<int>> GetYears()
         {
             var years = await _vehicleRepo.GetAllQueryable()
-                        .Where(s => s.Make == make && s.Model == model)
-                        .GroupBy(s => new { s.Make, s.Model, s.Year })
-                        .Select(g => g.Key.Year)
+                        .GroupBy(s => s.Year)
+                        .Select(g => g.Key)
                         .ToListAsync();
             if (years is null)
             {
                 throw new ApplicationException("Year is empty");
             }
-
             return years;
         }
 
@@ -143,9 +143,16 @@ namespace EBay.Service
             return vehicleDetailListDto;
         }
 
-        public async Task<IEnumerable<VehicleDetailDto>> GetVehicleDetailList(VehicleDataListRequestDto vehicleDataListRequestDto)
+        public async Task<IEnumerable<VehicleDetailDto>> GetVehicleDetailList(List<VehicleDataListRequestDto> vehicleDataListRequestDtoList)
         {
-            var res = await _dbContext.VehicleDetails.Where(s => s.Make == vehicleDataListRequestDto.Make && s.Model == vehicleDataListRequestDto.Model && s.Year == vehicleDataListRequestDto.Year).ToListAsync();
+            var res = Enumerable.Empty<VehicleDetail>();
+            var dataTable = Helper.ToDataTable(vehicleDataListRequestDtoList);
+            var parameter = new SqlParameter("@VehicleDataListRequest", dataTable)
+            {
+                SqlDbType = SqlDbType.Structured,
+                TypeName = "VehicleDataListRequestType"
+            };
+            res = _vehicleRepo.FromSqlRaw("EXEC  GetVehicleDetailList @VehicleDataListRequestType", [parameter]);
             return GetVehicleDetailListDto(res);
         }
     }

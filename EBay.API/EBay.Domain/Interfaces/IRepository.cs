@@ -32,6 +32,7 @@ namespace EBay.Domain.Interfaces
         Task<int> DeleteAsync(Expression<Func<T, bool>> condition);
         IQueryable<T> GetAllQueryable();
         IQueryable<T> GetQueryable(Expression<Func<T, bool>> filter);
+        IEnumerable<T> FromSqlRaw(string sql, object[] parameters);
     }
 
 }
