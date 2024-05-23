@@ -9,8 +9,6 @@
         public int Status { get; set; }
         public string Trim { get; set; }
         public string Engine { get; set; }
-        public bool IsDeleted { get; set; }
-        public DateTime CreatedOn { get; set; }
         public string Notes { get; set; }
 
     }

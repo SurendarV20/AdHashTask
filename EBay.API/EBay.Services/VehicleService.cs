@@ -115,7 +115,7 @@ namespace EBay.Service
 
         public async Task<IEnumerable<VehicleDetailDto>> GetSearchResults(string query)
         {
-            var res = await _dbContext.VehicleDetails.Where(s => s.Notes.Contains(query) || s.Make.Contains(query) || s.Year.ToString().Contains(query) || s.Model.Contains(query) || s.Trim.Contains(query)).ToListAsync();
+            var res = await _dbContext.VehicleDetails.Where(s => s.Notes.Contains(query) || s.Engine.Contains(query) || s.Make.Contains(query) || s.Year.ToString().Contains(query) || s.Model.Contains(query) || s.Trim.Contains(query)).ToListAsync();
             return GetVehicleDetailListDto(res);
         }
 
@@ -137,7 +137,8 @@ namespace EBay.Service
                     Engine = item.Engine,
                     Status = item.Status,
                     VehicleDetailId = item.VehicleDetailId,
-                });
+                    Notes = item.Notes is null ? "" : item.Notes
+                }); ;
             }
 
             return vehicleDetailListDto;
