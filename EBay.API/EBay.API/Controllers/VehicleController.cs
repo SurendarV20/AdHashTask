@@ -1,6 +1,8 @@
 ﻿using EBay.Domain;
 using EBay.Dto;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Distributed;
+using Newtonsoft.Json;
 
 namespace EBay.API.Controllers
 {
@@ -9,10 +11,12 @@ namespace EBay.API.Controllers
     public class VehicleController : ControllerBase
     {
         private readonly IVehicleService _vehicleService;
+        private readonly IDistributedCache _distributedCache;
 
-        public VehicleController(IVehicleService vehicleService)
+        public VehicleController(IVehicleService vehicleService, IDistributedCache distributedCache)
         {
             _vehicleService = vehicleService;
+            _distributedCache = distributedCache;
         }
 
 
@@ -62,9 +66,25 @@ namespace EBay.API.Controllers
 
 
         [HttpGet("View")]
-        public IActionResult View()
+        public async Task<IActionResult> ViewAsync()
         {
-            return Ok(_vehicleService.GetAllVehicleDetail());
+            var data = Enumerable.Empty<VehicleDetailDto>();
+            var cachedData = await _distributedCache.GetStringAsync("GetAllVehicleDetail");
+
+            if (cachedData != null)
+            {
+                data = JsonConvert.DeserializeObject<IEnumerable<VehicleDetailDto>>(cachedData);
+            }
+            else
+            {
+                data = _vehicleService.GetAllVehicleDetail();
+                var distributedCacheEntryOptions = new DistributedCacheEntryOptions();
+                distributedCacheEntryOptions.AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(15);
+                distributedCacheEntryOptions.SlidingExpiration = null;
+                var json = JsonConvert.SerializeObject(data);
+                await _distributedCache.SetStringAsync("GetAllVehicleDetail", json, distributedCacheEntryOptions);
+            }
+            return Ok(data);
         }
 
 
@@ -79,6 +99,7 @@ namespace EBay.API.Controllers
         public async Task<IActionResult> SaveNotes([FromBody] List<VehicleDetailDto> vehicleDetailList)
         {
             _vehicleService.SaveNotes(vehicleDetailList);
+
             return Ok();
         }
     }
