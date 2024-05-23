@@ -4,7 +4,6 @@
 
 namespace EBay.Infrastructure.Migrations
 {
-    /// <inheritdoc />
     public partial class addedFilterProcedure : Migration
     {
         /// <inheritdoc />
@@ -33,7 +32,7 @@ BEGIN
         vd.Status,
         vd.Trim,
         vd.Engine,
-        vd.Notes
+        ISNULL(vd.Notes,'') AS Notes
     FROM
         VehicleDetails vd
     INNER JOIN
@@ -52,10 +51,11 @@ END;
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.Sql(@"
-DROP TYPE VehicleDataListRequestType;
-GO
 DROP PROCEDURE GetVehicleDetailList;
 GO
+DROP TYPE VehicleDataListRequestType;
+GO
+
 ");
         }
     }

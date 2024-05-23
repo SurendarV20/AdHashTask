@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EBay.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240523022839_addedFilterProcedure")]
+    [Migration("20240523091100_addedFilterProcedure")]
     partial class addedFilterProcedure
     {
         /// <inheritdoc />

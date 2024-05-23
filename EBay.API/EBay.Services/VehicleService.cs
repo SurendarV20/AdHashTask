@@ -143,7 +143,7 @@ namespace EBay.Service
             return vehicleDetailListDto;
         }
 
-        public async Task<IEnumerable<VehicleDetailDto>> GetVehicleDetailList(List<VehicleDataListRequestDto> vehicleDataListRequestDtoList)
+        public IEnumerable<VehicleDetailDto> GetVehicleDetailList(List<VehicleDataListRequestDto> vehicleDataListRequestDtoList)
         {
             var res = Enumerable.Empty<VehicleDetail>();
             var dataTable = Helper.ToDataTable(vehicleDataListRequestDtoList);
@@ -152,8 +152,26 @@ namespace EBay.Service
                 SqlDbType = SqlDbType.Structured,
                 TypeName = "VehicleDataListRequestType"
             };
-            res = _vehicleRepo.FromSqlRaw("EXEC  GetVehicleDetailList @VehicleDataListRequestType", [parameter]);
+
+            res = _vehicleRepo.FromSqlRaw("EXEC GetVehicleDetailList @VehicleDataListRequest", [parameter]);
             return GetVehicleDetailListDto(res);
         }
+
+        public void SaveNotes(IEnumerable<VehicleDetailDto> vehicleDetailDtos)
+        {
+            var list = new List<VehicleDetail>();
+            foreach (var item in vehicleDetailDtos)
+            {
+                var veh = _dbContext.VehicleDetails.FirstOrDefault(s => s.VehicleDetailId == item.VehicleDetailId);
+                veh.VehicleDetailId = item.VehicleDetailId;
+                veh.Notes = item.Notes;
+                list.Add(veh);
+            }
+
+            _vehicleRepo.UpdateBulk(list);
+            _unitOfWork.Commit();
+
+        }
+
     }
 }

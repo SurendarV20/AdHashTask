@@ -74,5 +74,12 @@ namespace EBay.API.Controllers
         {
             return Ok(_vehicleService.GetVehicleDetailList(vehicleDataListRequestDtoList));
         }
+
+        [HttpPost("saveNotes")]
+        public async Task<IActionResult> SaveNotes([FromBody] List<VehicleDetailDto> vehicleDetailList)
+        {
+            _vehicleService.SaveNotes(vehicleDetailList);
+            return Ok();
+        }
     }
 }

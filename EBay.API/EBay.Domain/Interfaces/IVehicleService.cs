@@ -9,8 +9,9 @@ namespace EBay.Domain
         Task<IEnumerable<string>> GetMakes();
         Task<IEnumerable<string>> GetModels();
         Task<IEnumerable<VehicleDetailDto>> GetSearchResults(string query);
-        Task<IEnumerable<VehicleDetailDto>> GetVehicleDetailList(List<VehicleDataListRequestDto> vehicleDataListRequestDtoList);
+        IEnumerable<VehicleDetailDto> GetVehicleDetailList(List<VehicleDataListRequestDto> vehicleDataListRequestDtoList);
         Task<IEnumerable<int>> GetYears();
         Task ImportVehicles(IFormFile file);
+        void SaveNotes(IEnumerable<VehicleDetailDto> vehicleDetailDtos);
     }
 }
