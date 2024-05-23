@@ -64,5 +64,36 @@ namespace EBay.Helpers
             }
         }
 
+        public static async Task<string> GetDataAsync(string requestUrl)
+        {
+            using (HttpClient client = new HttpClient())
+            {
+                try
+                {
+                    client.BaseAddress = new Uri(requestUrl);
+
+
+                    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                    HttpResponseMessage response = await client.GetAsync(requestUrl);
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        string responseData = await response.Content.ReadAsStringAsync();
+                        return responseData;
+                    }
+                    else
+                    {
+                        throw new Exception("Error occurred while making request.");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception("Error occurred while making request.", ex);
+                }
+            }
+        }
+
+
     }
 }

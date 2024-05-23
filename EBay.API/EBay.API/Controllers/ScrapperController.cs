@@ -1,5 +1,5 @@
 ﻿using EBay.Dto;
-using EBay.Helpers;
+using HtmlAgilityPack;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EBay.API.Controllers
@@ -12,14 +12,42 @@ namespace EBay.API.Controllers
         [HttpPost("partNumber")]
         public async Task<IActionResult> GetScrappingDataAsync([FromQuery] string partNumber)
         {
-            string requestUrl = "https://www.wholesalehyundaiparts.com/wm.aspx/GetUserVehicles";
+            string requestUrl = $"https://www.wholesalehyundaiparts.com/p/__/16187484/{partNumber}.html";
+            //var data = await Helper.GetDataAsync(requestUrl);
+            HtmlWeb web = new HtmlWeb();
+            HtmlDocument doc = web.Load(requestUrl);
+            var info = new ScrappedPartInfo();
+            HtmlNode spanNode = doc.DocumentNode.SelectSingleNode("//span[@class='body-3 alt-stock-code-text']");
 
-            var reqData = new ScrapperRequestDto
+            if (spanNode != null)
             {
-                pageUrl = "/productDetails.aspx",
-                queryString = @$"\modelYear=0&stockNumber={partNumber}&ukey_product=16187484\"
-            };
-            return Ok(await Helper.PostDataAsync(requestUrl, reqData));
+                info.PartNumbers = spanNode.InnerText.Trim().Split("; ").Where(s => !string.IsNullOrEmpty(s)).ToList();
+            }
+
+            HtmlNodeCollection imgNodes = doc.DocumentNode.SelectNodes("//img[@class='imgTires']");
+
+            if (imgNodes != null)
+            {
+                foreach (HtmlNode imgNode in imgNodes)
+                {
+                    info.Images.Add(imgNode.Attributes.FirstOrDefault(s => s.Name == "src").Value);
+                }
+            }
+            HtmlNode descNode = doc.DocumentNode.SelectSingleNode("//span[@class='prodDescriptH2']");
+
+            if (descNode != null)
+            {
+                info.Description = descNode.InnerText;
+            }
+
+            HtmlNode priceNode = doc.DocumentNode.SelectSingleNode("//span[@class='productPriceSpan money-3']");
+
+            if (priceNode != null)
+            {
+                info.Price = Convert.ToDecimal(priceNode.InnerText.Replace("$", ""));
+            }
+
+            return Ok(info);
         }
     }
 }
